@@ -61,7 +61,7 @@ flowchart LR
 ```
 
 ### 📸 Airflow Pipeline Run (All Green)
-![Airflow DAG](dag.png)
+![Airflow DAG](docs/dag.png)
 
 ---
 
@@ -202,7 +202,15 @@ SELECT city_name, ts, temperature_c FROM (
 ```
 
 ### 📸 Warehouse Query Results
-![Warehouse Query Results](query.png)
+
+#### 1. Temperature Rankings, Hottest Hour (`RANK()`), & Rainfall:
+![Warehouse Queries 1-3](docs/query1.png)
+
+#### 2. Rainfall Summary, Weekend vs Weekday Humidity, & Moving Average:
+![Warehouse Queries 3-5](docs/query2.png)
+
+#### 3. 3-Hour Moving Average Time-Series:
+![Warehouse Query 5 Moving Average](docs/query3.png)
 
 ---
 
@@ -240,6 +248,7 @@ airflow-weather-etl/
 │   └── postgres-init.sql      # Creates the warehouse database
 ├── scripts/
 │   └── start.sh               # Airflow startup script
+├── docs/                      # Screenshots (dag.png, query1.png, query2.png, query3.png)
 ├── data/                      # Raw and staging files (git-ignored)
 ├── docker-compose.yml
 ├── requirements.txt
