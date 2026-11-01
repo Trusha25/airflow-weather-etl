@@ -1,0 +1,52 @@
+services:
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+      POSTGRES_DB: airflow
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./docker/postgres-init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "airflow"]
+      interval: 5s
+      retries: 10
+
+  airflow:
+    image: apache/airflow:2.9.3
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      AIRFLOW__WEBSERVER__SECRET_KEY: weather_etl_secret_key_12345
+      AIRFLOW__WEBSERVER__WORKERS: 2
+      AIRFLOW__WEBSERVER__WEB_SERVER_MASTER_TIMEOUT: 300
+      AIRFLOW__WEBSERVER__WEB_SERVER_WORKER_TIMEOUT: 300
+      PYTHONPATH: /opt/airflow
+      DATA_DIR: /opt/airflow/data
+      WAREHOUSE_DSN: postgresql://airflow:airflow@postgres:5432/warehouse
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./src:/opt/airflow/src
+      - ./sql:/opt/airflow/sql
+      - ./data:/opt/airflow/data
+      - ./scripts:/opt/airflow/scripts
+    command:
+      - bash
+      - -c
+      - |
+        airflow db migrate
+        airflow users create --username admin --password admin --firstname Admin --lastname User --role Admin --email admin@example.com || true
+        airflow scheduler &
+        exec airflow webserver
+
+volumes:
+  pgdata:
