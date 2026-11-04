@@ -250,6 +250,7 @@ airflow-weather-etl/
 │   └── start.sh               # Airflow startup script
 ├── docs/                      # Screenshots (dag.png, query1.png, query2.png, query3.png)
 ├── data/                      # Raw and staging files (git-ignored)
+├── Dockerfile                 # Custom Airflow image with requirements.txt
 ├── docker-compose.yml
 ├── requirements.txt
 └── README.md
