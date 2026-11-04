@@ -272,7 +272,7 @@ airflow-weather-etl/
 
 | Problem | Fix |
 |---|---|
-| Airflow page does not load | Wait a minute, then check `docker compose logs airflow` |
+| Airflow page does not load | Wait a minute, then check `docker compose logs airflow-webserver` |
 | `start.sh` fails on Windows | Make sure the file uses LF line endings (the repo's `.gitattributes` handles this on a fresh clone) |
 | Port 8080 or 5433 is already in use | Change the left-hand port number in `docker-compose.yml` |
 | `extract` task fails | Check your internet connection and read the task log in the Airflow UI |
