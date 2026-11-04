@@ -5,6 +5,8 @@
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-336791?logo=postgresql&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)
 ![Tests](https://img.shields.io/badge/tests-pytest-green)
+![CI](https://github.com/Trusha25/airflow-weather-etl/actions/workflows/ci.yml/badge.svg)
+![License](https://img.shields.io/badge/license-MIT-brightgreen)
 
 A production-style, end-to-end **data engineering pipeline** that collects hourly weather data for six Indian cities, cleans and validates it, and loads it into a **star-schema data warehouse** on PostgreSQL. It is orchestrated by **Apache Airflow** and runs fully in **Docker** with a single command.
 
@@ -22,6 +24,7 @@ A production-style, end-to-end **data engineering pipeline** that collects hourl
 - [Running Tests](#-running-tests)
 - [Project Structure](#-project-structure)
 - [Design Decisions](#-design-decisions)
+- [Limitations](#-limitations)
 - [Troubleshooting](#-troubleshooting)
 - [Future Improvements](#-future-improvements)
 - [Author](#-author)
@@ -231,6 +234,9 @@ The tests cover the transform step (shape, de-duplication, empty handling) and d
 
 ```
 airflow-weather-etl/
+├── .github/
+│   └── workflows/
+│       └── ci.yml             # GitHub Actions: ruff lint + pytest
 ├── dags/
 │   └── weather_etl_dag.py     # Airflow DAG definition
 ├── src/
@@ -248,8 +254,10 @@ airflow-weather-etl/
 │   └── postgres-init.sql      # Creates the warehouse database
 ├── docs/                      # Screenshots (dag.png, query1.png, query2.png, query3.png)
 ├── data/                      # Raw and staging files (git-ignored)
+├── .env.example               # Environment variable template
 ├── Dockerfile                 # Custom Airflow image with requirements.txt
 ├── docker-compose.yml
+├── LICENSE                    # MIT License
 ├── requirements.txt
 └── README.md
 ```
@@ -275,16 +283,27 @@ airflow-weather-etl/
 | Airflow webserver still booting | Initial start takes ~45s for migrations; verify status with `docker compose ps` |
 | Port 8080 or 5433 is already in use | Change the left-hand port number in `docker-compose.yml` |
 | `extract` task fails | Check your internet connection and read the task log in the Airflow UI |
+| `warehouse` database missing / `relation does not exist` | The `warehouse` DB is only created on first volume init. Run `docker compose down -v` then `docker compose up -d` to reinitialize |
 | Want a clean slate | `docker compose down -v` and start again |
+
+---
+
+## ⚠️ Limitations
+
+- **Single Postgres instance** serves as both the Airflow metadata database and the analytics warehouse. In production, these would be separate clusters.
+- **LocalExecutor** runs tasks in the scheduler process. For parallel/distributed workloads, CeleryExecutor or KubernetesExecutor would be used.
+- **File-path XCom** between tasks (e.g., passing CSV paths) requires a shared volume mount across all Airflow containers.
+- **All 6 cities are extracted sequentially** in a single `extract` task. A production pipeline might fan out with dynamic task mapping for parallel extraction.
+- **No alerting integration** yet — the `on_failure_callback` logs errors but does not send Slack/email notifications.
 
 ---
 
 ## 🔮 Future Improvements
 
 - [ ] Add **dbt** models for a cleaner analytics layer
-- [ ] Add failure alerts through Slack or email (`on_failure_callback`)
+- [ ] Add **Slack/email alerts** on failure (extend `on_failure_callback`)
 - [ ] Build a **Tableau / Streamlit** dashboard on top of the warehouse
-- [ ] Add CI with **GitHub Actions** (lint and tests on every push)
+- [ ] **Dynamic task mapping** to extract cities in parallel
 - [ ] Backfill historical data with Airflow `catchup`
 - [ ] Deploy on a cloud VM
 
