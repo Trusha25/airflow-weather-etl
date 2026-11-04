@@ -1,8 +1,8 @@
 """EXTRACT: pull hourly weather for each city from the Open-Meteo API."""
-from datetime import date
 import json
 import logging
 import sys
+from datetime import date
 
 import requests
 

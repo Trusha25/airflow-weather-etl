@@ -1,8 +1,8 @@
-from datetime import timedelta
 import logging
+from datetime import timedelta
 
-from airflow.decorators import dag, task
 import pendulum
+from airflow.decorators import dag, task
 
 log = logging.getLogger(__name__)
 

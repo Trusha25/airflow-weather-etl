@@ -1,8 +1,8 @@
 """TRANSFORM: raw JSON -> clean, tidy table (one row per city per hour)."""
 import json
 import logging
-from pathlib import Path
 import sys
+from pathlib import Path
 
 import pandas as pd
 
