@@ -315,6 +315,6 @@ airflow-weather-etl/
 Aspiring Data Engineer
 
 - GitHub: [@Trusha25](https://github.com/Trusha25)
-- LinkedIn: _add your profile link here_
+- LinkedIn: [Trusha Jadhav](https://www.linkedin.com/in/trusha-jadhav-185bba313/)
 
 ⭐ If you found this project useful, consider giving it a star.
