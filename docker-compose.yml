@@ -2,16 +2,16 @@ services:
   postgres:
     image: postgres:15
     environment:
-      POSTGRES_USER: airflow
-      POSTGRES_PASSWORD: airflow
-      POSTGRES_DB: airflow
+      POSTGRES_USER: ${POSTGRES_USER:-airflow}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-airflow}
+      POSTGRES_DB: ${POSTGRES_DB:-airflow}
     ports:
-      - "5433:5432"
+      - "${POSTGRES_PORT:-5433}:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./docker/postgres-init.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
-      test: ["CMD", "pg_isready", "-U", "airflow"]
+      test: ["CMD", "pg_isready", "-U", "${POSTGRES_USER:-airflow}"]
       interval: 5s
       retries: 10
 
@@ -22,15 +22,15 @@ services:
         condition: service_healthy
     environment:
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
-      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${POSTGRES_USER:-airflow}:${POSTGRES_PASSWORD:-airflow}@postgres:5432/${POSTGRES_DB:-airflow}
       AIRFLOW__CORE__LOAD_EXAMPLES: "false"
-      AIRFLOW__WEBSERVER__SECRET_KEY: weather_etl_secret_key_12345
+      AIRFLOW__WEBSERVER__SECRET_KEY: ${AIRFLOW_SECRET_KEY:-weather_etl_secret_key_12345}
       AIRFLOW__WEBSERVER__WORKERS: 2
       AIRFLOW__WEBSERVER__WEB_SERVER_MASTER_TIMEOUT: 300
       AIRFLOW__WEBSERVER__WEB_SERVER_WORKER_TIMEOUT: 300
       PYTHONPATH: /opt/airflow
       DATA_DIR: /opt/airflow/data
-      WAREHOUSE_DSN: postgresql://airflow:airflow@postgres:5432/warehouse
+      WAREHOUSE_DSN: postgresql://${POSTGRES_USER:-airflow}:${POSTGRES_PASSWORD:-airflow}@postgres:5432/${WAREHOUSE_DB:-warehouse}
     ports:
       - "8080:8080"
     volumes:
@@ -44,7 +44,7 @@ services:
       - -c
       - |
         airflow db migrate
-        airflow users create --username admin --password admin --firstname Admin --lastname User --role Admin --email admin@example.com || true
+        airflow users create --username ${AIRFLOW_ADMIN_USER:-admin} --password ${AIRFLOW_ADMIN_PASSWORD:-admin} --firstname ${AIRFLOW_ADMIN_FIRSTNAME:-Admin} --lastname ${AIRFLOW_ADMIN_LASTNAME:-User} --role Admin --email ${AIRFLOW_ADMIN_EMAIL:-admin@example.com} || true
         airflow scheduler &
         exec airflow webserver
 
